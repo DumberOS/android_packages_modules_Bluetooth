@@ -177,7 +177,8 @@ struct HciLayer::impl {
   template <typename TResponse>
   void handle_command_response(EventView event, std::string logging_id) {
     TResponse response_view = TResponse::Create(event);
-    ASSERT(response_view.IsValid());
+    if (!response_view.IsValid())
+        return;
     command_credits_ = response_view.GetNumHciCommandPackets();
     OpCode op_code = response_view.GetCommandOpCode();
     if (op_code == OpCode::NONE) {
