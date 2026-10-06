@@ -3511,10 +3511,11 @@ public class AdapterService extends Service {
             }
 
             ParcelUuid[] parcels = service.getRemoteUuids(device);
-            if (parcels == null) {
-                return null;
-            }
-            return Arrays.asList(parcels);
+            // Resolve the actual Binder caller, not an app-supplied package name. Only
+            // change this response; never write compatibility UUIDs into RemoteDevices.
+            return SamsungWatchCompatibility.getRemoteUuids(
+                    service.getPackageManager().getPackagesForUid(Binder.getCallingUid()),
+                    service.getRemoteName(device), parcels);
         }
 
         @Override
