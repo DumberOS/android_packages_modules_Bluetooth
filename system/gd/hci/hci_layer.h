@@ -62,6 +62,10 @@ class HciLayer : public Module, public CommandInterface<CommandBuilder> {
       std::unique_ptr<CommandBuilder> command,
       common::ContextualOnceCallback<void(CommandStatusView)> on_status) override;
 
+    void EnqueueCommand(
+        std::unique_ptr<CommandBuilder> command,
+        common::ContextualOnceCallback<void(CommandStatusOrCompleteView)> on_status_or_complete) override;
+
   virtual common::BidiQueueEnd<AclBuilder, AclView>* GetAclQueueEnd();
 
   virtual common::BidiQueueEnd<ScoBuilder, ScoView>* GetScoQueueEnd();
@@ -165,6 +169,12 @@ class HciLayer : public Module, public CommandInterface<CommandBuilder> {
                         common::ContextualOnceCallback<void(CommandStatusView)> on_status) override {
       hci_.EnqueueCommand(std::move(command), std::move(on_status));
     }
+
+    void EnqueueCommand(std::unique_ptr<T> command,
+                        common::ContextualOnceCallback<void(CommandStatusOrCompleteView)> on_status_or_complete) override {
+      hci_.EnqueueCommand(std::move(command), std::move(on_status_or_complete));
+    }
+
     HciLayer& hci_;
   };
 

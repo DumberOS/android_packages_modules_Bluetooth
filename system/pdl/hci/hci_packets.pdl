@@ -3461,6 +3461,11 @@ packet LeCreateConnection : LeConnectionManagementCommand (op_code = LE_CREATE_C
 packet LeCreateConnectionStatus : CommandStatus (command_op_code = LE_CREATE_CONNECTION) {
 }
 
+// This packet is not in the bluetooth spec, however it is used by the Qin F22 Pro in place of the standard LeCreateConnectionStatus
+packet LeCreateConnectionComplete : CommandComplete (command_op_code = LE_CREATE_CONNECTION) {
+  status : ErrorCode,
+}
+
 packet LeCreateConnectionCancel : LeConnectionManagementCommand (op_code = LE_CREATE_CONNECTION_CANCEL) {
 }
 
