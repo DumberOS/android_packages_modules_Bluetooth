@@ -786,10 +786,24 @@ struct le_impl : public bluetooth::hci::LeAddressManagerCallback {
     update_connectability_state_after_armed(status.GetStatus());
   }
 
-  void on_create_connection(CommandStatusView status) {
-    ASSERT(status.IsValid());
-    ASSERT(status.GetCommandOpCode() == OpCode::LE_CREATE_CONNECTION);
-    update_connectability_state_after_armed(status.GetStatus());
+  // Bluetooth spec says LE_CREATE_CONNECTION should be responded too with a CommandStatus, however,
+  // the bluetooth chip on the Qin F22 Pro responds with CommandComplete, so either option is
+  // allowed.
+  void on_create_connection(CommandStatusOrCompleteView status_or_complete) {
+    if (std::holds_alternative<CommandStatusView>(status_or_complete)) {
+      auto status = std::get<CommandStatusView>(status_or_complete);
+
+      ASSERT(status.IsValid());
+      ASSERT(status.GetCommandOpCode() == OpCode::LE_CREATE_CONNECTION);
+      update_connectability_state_after_armed(status.GetStatus());
+    } else if (std::holds_alternative<CommandCompleteView>(status_or_complete)) {
+      auto complete = std::get<CommandCompleteView>(status_or_complete);
+      auto le_complete = LeCreateConnectionCompleteView::Create(complete);
+
+      ASSERT(le_complete.IsValid());
+      ASSERT(le_complete.GetCommandOpCode() == OpCode::LE_CREATE_CONNECTION);
+      update_connectability_state_after_armed(le_complete.GetStatus());
+    }
   }
 
   void arm_connectability() {

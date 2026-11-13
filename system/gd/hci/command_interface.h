@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <variant>
+
 #include "common/contextual_callback.h"
 #include "hci/hci_packets.h"
 #include "os/handler.h"
@@ -23,6 +25,8 @@
 
 namespace bluetooth {
 namespace hci {
+
+typedef std::variant<CommandStatusView, CommandCompleteView> CommandStatusOrCompleteView;
 
 template <typename T>
 class CommandInterface {
@@ -38,6 +42,10 @@ class CommandInterface {
 
   virtual void EnqueueCommand(std::unique_ptr<T> command,
                               common::ContextualOnceCallback<void(CommandStatusView)> on_status) = 0;
+  
+  virtual void EnqueueCommand(std::unique_ptr<T> command,
+                              common::ContextualOnceCallback<void(CommandStatusOrCompleteView)>
+                                      on_status_or_complete) = 0;
 };
 }  // namespace hci
 }  // namespace bluetooth
